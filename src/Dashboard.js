@@ -14,6 +14,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
+import { color } from "chart.js/helpers";
 
 const Login = ({ onLogin }) => {
   const [email, setEmail] = useState("");
@@ -89,25 +90,25 @@ const Dashboard = ({ onLogout }) => {
           }
         }
       );
-      
+
       if (!response.ok) {
         throw new Error("Failed to fetch data");
       }
       const apiData = await response.json();
-      
+
       // Check if data exists
       if (!apiData) {
         throw new Error("No data received");
       }
-      
+
       processReservationData(apiData);
     } catch (err) {
       setError(err.message);
       console.error("Error fetching data:", err);
       setFilteredTableData([]);
       setChartData([]);
-      setSummaryStats({ 
-        total: 0, 
+      setSummaryStats({
+        total: 0,
         reservations: 0,
         upcomingReservations: 0
       });
@@ -120,18 +121,18 @@ const Dashboard = ({ onLogout }) => {
     // If the API returns an array, use it directly
     // If it returns a single object, wrap it in an array
     const reservations = Array.isArray(apiData) ? apiData : [apiData];
-    
+
     setFilteredTableData(reservations);
 
     // Prepare data for the chart
     const chartDataMap = {};
-    
+
     reservations.forEach(res => {
       if (!res.reservation_details) return;
-      
+
       const dateKey = res.reservation_details.reservation_date;
       if (!dateKey) return;
-      
+
       if (!chartDataMap[dateKey]) {
         chartDataMap[dateKey] = {
           date: dateKey,
@@ -139,12 +140,12 @@ const Dashboard = ({ onLogout }) => {
           guests: 0
         };
       }
-      
+
       chartDataMap[dateKey].reservations += 1;
       chartDataMap[dateKey].guests += parseInt(res.reservation_details.number_of_guests) || 0;
     });
 
-    const sortedChartData = Object.values(chartDataMap).sort((a, b) => 
+    const sortedChartData = Object.values(chartDataMap).sort((a, b) =>
       new Date(a.date) - new Date(b.date)
     );
 
@@ -158,7 +159,7 @@ const Dashboard = ({ onLogout }) => {
       const resDate = new Date(`${res.reservation_details.reservation_date}T${res.reservation_details.reservation_time}`);
       return resDate > today;
     }).length;
-    
+
     setSummaryStats({
       total: total,
       reservations: total,
@@ -224,7 +225,7 @@ const Dashboard = ({ onLogout }) => {
       {/* Main Content */}
       <div style={{ flex: 1, padding: "20px" }}>
         <h1 style={{ color: "#fff" }}>Reservation Overview</h1>
-        
+
         {/* Phone number dropdown and date picker */}
         <div style={{ marginBottom: "20px", display: "flex", gap: "20px", alignItems: "center" }}>
           <div>
@@ -248,7 +249,7 @@ const Dashboard = ({ onLogout }) => {
               ))}
             </select>
           </div>
-          
+
           <div>
             <label>Select a Date: </label>
             <DatePicker
@@ -305,23 +306,23 @@ const Dashboard = ({ onLogout }) => {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="#444" />
-                <XAxis 
-                  dataKey="date" 
+                <XAxis
+                  dataKey="date"
                   stroke="#fff"
                   tick={{ fill: '#fff' }}
                 />
-                <YAxis 
+                <YAxis
                   stroke="#fff"
                   tick={{ fill: '#fff' }}
                 />
-                <Tooltip 
+                <Tooltip
                   contentStyle={{
                     backgroundColor: '#333',
                     borderColor: '#555',
                     color: '#fff'
                   }}
                 />
-                <Legend 
+                <Legend
                   wrapperStyle={{
                     color: '#fff',
                     paddingTop: '20px'
@@ -345,38 +346,64 @@ const Dashboard = ({ onLogout }) => {
           </div>
         )}
 
-        {/* Reservation Table */}
+        {/* Call Metadata Table */}
         {filteredTableData.length > 0 && (
-          <div style={{ marginTop: "30px" }}>
-            <h2>Reservation Details</h2>
-            <table style={tableStyle}>
-              <thead>
-                <tr>
-                  <th style={tableHeaderStyle}>Customer Name</th>
-                  <th style={tableHeaderStyle}>Phone</th>
-                  <th style={tableHeaderStyle}>Reservation Date</th>
-                  <th style={tableHeaderStyle}>Time</th>
-                  <th style={tableHeaderStyle}>Guests</th>
-                  <th style={tableHeaderStyle}>Allergies</th>
-                  <th style={tableHeaderStyle}>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredTableData.map((item, index) => (
-                  <tr key={index}>
-                    <td style={tableCellStyle}>{item.reservation_details?.customer_name || 'N/A'}</td>
-                    <td style={tableCellStyle}>{item.reservation_details?.phone_number || 'N/A'}</td>
-                    <td style={tableCellStyle}>{item.reservation_details?.reservation_date || 'N/A'}</td>
-                    <td style={tableCellStyle}>{item.reservation_details?.reservation_time || 'N/A'}</td>
-                    <td style={tableCellStyle}>{item.reservation_details?.number_of_guests || 'N/A'}</td>
-                    <td style={tableCellStyle}>{item.reservation_details?.allergies || 'None'}</td>
-                    <td style={tableCellStyle}>
-                      {item.reservation_details?.confirmation_status ? 'Confirmed' : 'Not Confirmed'}
-                    </td>
+          <div style={{
+            display: 'flex',
+            marginTop: '30px',
+            overflowX: 'auto' // For responsive behavior on small screens
+          }}>
+            {/* Call Metadata Table */}
+            <div style={{ flex: 1 }}>
+              <h2>Call Information</h2>
+              <table style={tableOneStyle}>
+                <thead>
+                  <tr style={{ backgroundColor: '#F5F5DC' }}> {/* Highlighted header row */}
+                    <th style={tableHeaderStyle}>Incoming Phone</th>
+                    <th style={tableHeaderStyle}>Call Date</th>
+                    <th style={tableHeaderStyle}>Call Time</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {filteredTableData.map((item, index) => (
+                    <tr key={`call-${index}`}>
+                      <td style={tableCellStyle}>{item.call_metadata?.incoming_phone_number || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.call_metadata?.call_date || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.call_metadata?.call_time || 'N/A'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Reservation Table */}
+            <div style={{ flex: 2 }}>
+              <h2>Reservation Details</h2>
+              <table style={tableTwoStyle}>
+                <thead>
+                  <tr style={{ backgroundColor: '#f0f0f0' }}> {/* Highlighted header row */}
+                    <th style={tableHeaderStyle}>Customer Name</th>
+                    <th style={tableHeaderStyle}>Phone</th>
+                    <th style={tableHeaderStyle}>Reservation Date</th>
+                    <th style={tableHeaderStyle}>Time</th>
+                    <th style={tableHeaderStyle}>Guests</th>
+                    <th style={tableHeaderStyle}>Allergies</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredTableData.map((item, index) => (
+                    <tr key={`reservation-${index}`}>
+                      <td style={tableCellStyle}>{item.reservation_details?.customer_name || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.reservation_details?.phone_number || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.reservation_details?.reservation_date || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.reservation_details?.reservation_time || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.reservation_details?.number_of_guests || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.reservation_details?.allergies || 'None'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         )}
 
@@ -442,7 +469,15 @@ const statValueStyle = {
   fontWeight: "bold",
 };
 
-const tableStyle = {
+const tableOneStyle = {
+  width: "100%",
+  borderCollapse: "collapse",
+  marginTop: "20px",
+  backgroundColor: "#F5F5DC",
+  color: "#000",
+};
+
+const tableTwoStyle = {
   width: "100%",
   borderCollapse: "collapse",
   marginTop: "20px",
