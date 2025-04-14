@@ -70,6 +70,7 @@ const Dashboard = ({ onLogout }) => {
   const [selectedPhone, setSelectedPhone] = useState("+15037483026");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [lastUpdate, setLastUpdate] = useState("");
 
   const phoneNumbers = [
     { value: "+15037483026", label: "+15037483026" },
@@ -82,7 +83,7 @@ const Dashboard = ({ onLogout }) => {
     setError(null);
     try {
       const response = await fetch(
-        `https://healthiclick.in/reservations/?phone=${selectedPhone}`,
+        `${process.env.REACT_APP_RESERVATION_API}/?phone=${selectedPhone}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -116,6 +117,24 @@ const Dashboard = ({ onLogout }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetch(process.env.REACT_APP_API_LAST_UPDATE)
+      .then(res => {
+        if (!res.ok) {
+          throw new Error("Network response was not OK");
+        }
+        return res.json();
+      })
+      .then(data => {
+        setLastUpdate(data.last_run);
+      })
+      .catch(err => {
+        console.error("Failed to fetch last run:", err);
+      });
+  }, []);
+  
+  
 
   const processReservationData = (apiData) => {
     // If the API returns an array, use it directly
@@ -270,6 +289,13 @@ const Dashboard = ({ onLogout }) => {
               }
             />
           </div>
+
+          {lastUpdate && (
+            <div style={{ color: "#aaa", fontSize: "14px", marginLeft: "10px" }}>
+              Last Update: {lastUpdate}
+            </div>
+          )}
+
         </div>
 
         {loading && <p style={{ color: "#fff" }}>Loading data...</p>}
@@ -360,6 +386,7 @@ const Dashboard = ({ onLogout }) => {
                 <thead>
                   <tr style={{ backgroundColor: '#F5F5DC' }}> {/* Highlighted header row */}
                     <th style={tableHeaderStyle}>Incoming Phone</th>
+                    <th style={tableHeaderStyle}>restaurant Number</th>
                     <th style={tableHeaderStyle}>Call Date</th>
                     <th style={tableHeaderStyle}>Call Time</th>
                   </tr>
@@ -368,6 +395,7 @@ const Dashboard = ({ onLogout }) => {
                   {filteredTableData.map((item, index) => (
                     <tr key={`call-${index}`}>
                       <td style={tableCellStyle}>{item.call_metadata?.incoming_phone_number || 'N/A'}</td>
+                      <td style={tableCellStyle}>{item.call_metadata?.to_number || 'N/A'}</td>
                       <td style={tableCellStyle}>{item.call_metadata?.call_date || 'N/A'}</td>
                       <td style={tableCellStyle}>{item.call_metadata?.call_time || 'N/A'}</td>
                     </tr>
