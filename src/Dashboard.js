@@ -133,8 +133,8 @@ const Dashboard = ({ onLogout }) => {
         console.error("Failed to fetch last run:", err);
       });
   }, []);
-  
-  
+
+
 
   const processReservationData = (apiData) => {
     // If the API returns an array, use it directly
@@ -384,7 +384,7 @@ const Dashboard = ({ onLogout }) => {
               <h2>Call Information</h2>
               <table style={tableOneStyle}>
                 <thead>
-                  <tr style={{ backgroundColor: '#F5F5DC' }}> {/* Highlighted header row */}
+                  <tr style={{ backgroundColor: '#F5F5DC', height: '70px' }}> {/* Highlighted header row */}
                     <th style={tableHeaderStyle}>Incoming Phone</th>
                     <th style={tableHeaderStyle}>restaurant Number</th>
                     <th style={tableHeaderStyle}>Call Date</th>
@@ -405,11 +405,11 @@ const Dashboard = ({ onLogout }) => {
             </div>
 
             {/* Reservation Table */}
-            <div style={{ flex: 2 }}>
+            <div style={{ flex: 1 }}>
               <h2>Reservation Details</h2>
               <table style={tableTwoStyle}>
                 <thead>
-                  <tr style={{ backgroundColor: '#f0f0f0' }}> {/* Highlighted header row */}
+                  <tr style={{ backgroundColor: '#f0f0f0', height: '70px' }}> {/* Highlighted header row */}
                     <th style={tableHeaderStyle}>Customer Name</th>
                     <th style={tableHeaderStyle}>Phone</th>
                     <th style={tableHeaderStyle}>Reservation Date</th>
@@ -421,13 +421,49 @@ const Dashboard = ({ onLogout }) => {
                 <tbody>
                   {filteredTableData.map((item, index) => (
                     <tr key={`reservation-${index}`}>
-                      <td style={tableCellStyle}>{item.reservation_details?.customer_name || 'N/A'}</td>
-                      <td style={tableCellStyle}>{item.reservation_details?.phone_number || 'N/A'}</td>
+                      <td
+                        style={{
+                          ...tableCellStyle,
+                          width: '220px', // or any width you prefer
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {item.reservation_details?.customer_name || 'N/A'}
+                      </td>                      <td style={{
+                        ...tableCellStyle,
+                        maxWidth: '120px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>{item.reservation_details?.phone_number || 'N/A'}</td>
                       <td style={tableCellStyle}>{item.reservation_details?.reservation_date || 'N/A'}</td>
-                      <td style={tableCellStyle}>{item.reservation_details?.reservation_time || 'N/A'}</td>
-                      <td style={tableCellStyle}>{item.reservation_details?.number_of_guests || 'N/A'}</td>
-                      <td style={tableCellStyle}>{item.reservation_details?.allergies || 'None'}</td>
-                    </tr>
+                      <td style={{
+                        ...tableCellStyle,
+                        maxWidth: '50px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>{item.reservation_details?.reservation_time || 'N/A'}</td>
+                      <td style={{
+                        ...tableCellStyle,
+                        maxWidth: '50px',
+                        whiteSpace: 'nowrap',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                      }}>{item.reservation_details?.number_of_guests || 'N/A'}</td>
+                      <td
+                        style={{
+                          ...tableCellStyle,
+                          maxWidth: '150px',
+                          whiteSpace: 'nowrap',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                        }}
+                      >
+                        {item.reservation_details?.allergies || 'None'}
+                      </td>                    </tr>
                   ))}
                 </tbody>
               </table>
@@ -499,6 +535,7 @@ const statValueStyle = {
 
 const tableOneStyle = {
   width: "100%",
+  height: "150px",
   borderCollapse: "collapse",
   marginTop: "20px",
   backgroundColor: "#F5F5DC",
@@ -506,7 +543,8 @@ const tableOneStyle = {
 };
 
 const tableTwoStyle = {
-  width: "100%",
+  width: "fit-content",
+  height: "150px",
   borderCollapse: "collapse",
   marginTop: "20px",
   backgroundColor: "#1F1F1F",
