@@ -324,7 +324,7 @@ const Dashboard = ({ onLogout }) => {
                                 fontSize: '12px',
                                 borderRadius: '4px',
                                 border: 'none',
-                                backgroundColor: '#4CAF50',
+                                backgroundColor: '#4CAF50 ',
                                 color: '#fff',
                                 cursor: 'pointer'
                               }}>
