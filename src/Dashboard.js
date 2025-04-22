@@ -357,7 +357,7 @@ const Dashboard = ({ onLogout }) => {
                   marginTop: '10px',
                   padding: '8px 16px',
                   fontSize: '14px',
-                  backgroundColor: '#4CAF50',
+                  backgroundColor: '#4CAF50' ,
                   border: 'none',
                   borderRadius: '4px',
                   color: '#fff',
