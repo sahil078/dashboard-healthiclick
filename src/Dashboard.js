@@ -232,21 +232,6 @@ const Dashboard = ({ onLogout }) => {
               Last Update: {lastUpdate}
             </div>
           )}
-
-          <button
-            onClick={fetchData}
-            style={{
-              backgroundColor: "#4CAF50",
-              color: "#fff",
-              padding: "8px 12px",
-              border: "none",
-              borderRadius: "5px",
-              cursor: "pointer",
-              marginLeft: "10px"
-            }}
-          >
-            Refresh
-          </button>
         </div>
 
         {loading && <p style={{ color: "#fff" }}>Loading data...</p>}
@@ -419,10 +404,25 @@ const modalStyle = {
 };
 
 const App = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(()=>
+  localStorage.getItem("isLoggedIn") === "true");
+  const handleLogin = () => {
+    setIsLoggedIn(true);
+    localStorage.setItem("isLoggedIn", "true");
+  }
+
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.setItem("isLoggedIn", "false");
+  }
+
   return (
     <div>
-      {!isLoggedIn ? <Login onLogin={() => setIsLoggedIn(true)} /> : <Dashboard onLogout={() => setIsLoggedIn(false)} />}
+      {!isLoggedIn ? (
+        <Login onLogin={handleLogin} />
+      ) : (
+        <Dashboard onLogout={handleLogout} />
+      )}
     </div>
   );
 };
