@@ -81,6 +81,13 @@ const Dashboard = ({ onLogout }) => {
     { value: "+27872502261", label: "+27872502261" }
   ];
 
+  const fetchLastUpdate = () => {
+    fetch(process.env.REACT_APP_API_LAST_UPDATE)
+      .then(res => res.ok ? res.json() : Promise.reject("Failed"))
+      .then(data => setLastUpdate(data.last_run))
+      .catch(err => console.error("Last update error:", err));
+  };
+
   const fetchData = async () => {
     setLoading(true);
     setError(null);
@@ -98,6 +105,7 @@ const Dashboard = ({ onLogout }) => {
       const apiData = await response.json();
       if (!apiData) throw new Error("No data received");
       processReservationData(apiData);
+      fetchLastUpdate(); // Fetch latest update info
     } catch (err) {
       setError(err.message);
       console.error("Error fetching data:", err);
@@ -108,6 +116,10 @@ const Dashboard = ({ onLogout }) => {
       setLoading(false);
     }
   };
+
+  useEffect(() => { fetchData(); }, [selectedPhone, selectedDate]);
+  useEffect(() => { fetchLastUpdate(); }, []);
+
 
   const processReservationData = (apiData) => {
     const reservations = Array.isArray(apiData) ? apiData : [apiData];
@@ -141,15 +153,6 @@ const Dashboard = ({ onLogout }) => {
       upcomingReservations: upcoming
     });
   };
-
-  useEffect(() => { fetchData(); }, [selectedPhone, selectedDate]);
-
-  useEffect(() => {
-    fetch(process.env.REACT_APP_API_LAST_UPDATE)
-      .then(res => res.ok ? res.json() : Promise.reject("Failed"))
-      .then(data => setLastUpdate(data.last_run))
-      .catch(err => console.error("Last update error:", err));
-  }, []);
 
   const toggleSidebar = () => setSidebarOpen(!sidebarOpen);
 
